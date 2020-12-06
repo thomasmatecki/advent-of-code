@@ -11,6 +11,8 @@ pub fn solution_1() -> i32 {
     let mut numbers = parse_input();
 
     for pivot in (1..numbers.len()).rev() {
+        // Iterate like a bubblesort, after each iteration all entries to the
+        // right of `pivot` are sorted AND greater than ALL those to the left.
         for idx in 0..pivot {
             if numbers[idx] > numbers[idx + 1] {
                 numbers.swap(idx, idx + 1);
