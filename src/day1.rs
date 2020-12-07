@@ -18,6 +18,7 @@ pub fn solution_1() -> i32 {
                 numbers.swap(idx, idx + 1);
             }
         }
+
         // Binary search from pivot -> to the end of the array for number that
         // adds up to 2020;
         let operand0 = numbers[pivot - 1];

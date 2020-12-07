@@ -1,7 +1,7 @@
 use crate::utils::load_input;
 extern crate regex;
 
-use regex::{Captures, Regex};
+use regex::Regex;
 
 struct Record {
     mino: usize,
@@ -39,6 +39,7 @@ pub fn solution_1() -> u32 {
 
     for record in password_records {
         let letter_count: usize = record.password.matches(record.letter).count();
+
         if (record.mino..record.maxo + 1).contains(&letter_count) {
             count += 1;
         };
