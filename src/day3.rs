@@ -1,4 +1,5 @@
 use crate::utils::load_input;
+
 fn count_trees(right: usize, down: usize) -> u32 {
     let mut count = 0;
 
