@@ -1,4 +1,5 @@
 use crate::utils::load_input;
+use lazy_static::lazy_static;
 use regex::Regex;
 use std::collections::HashMap;
 use std::mem::replace;
@@ -17,8 +18,10 @@ fn is_valid_year(year_str: &str, min: u32, max: u32) -> bool {
 }
 
 fn is_valid_height(height_str: &str) -> bool {
-    let re = Regex::new(r"^(\d+)(cm|in)$").unwrap();
-    match re.captures(height_str) {
+    lazy_static! {
+        static ref RE: Regex = Regex::new(r"^(\d+)(cm|in)$").unwrap();
+    }
+    match RE.captures(height_str) {
         Some(capture) => {
             let value: u32 = capture[1].parse().unwrap();
             if &capture[2] == "cm" {
@@ -34,8 +37,10 @@ fn is_valid_height(height_str: &str) -> bool {
 }
 
 fn is_valid_hair_color(hair_color: &str) -> bool {
-    let re = Regex::new(r"#(\d|[a-f]){6}").unwrap();
-    re.is_match(hair_color)
+    lazy_static! {
+        static ref RE: Regex = Regex::new(r"#(\d|[a-f]){6}").unwrap();
+    }
+    RE.is_match(hair_color)
 }
 
 fn is_valid_eye_color(eye_color: &str) -> bool {
@@ -43,8 +48,10 @@ fn is_valid_eye_color(eye_color: &str) -> bool {
 }
 
 fn is_valid_passport(passpord_id: &str) -> bool {
-    let re = Regex::new(r"^\d{9}$").unwrap();
-    re.is_match(passpord_id)
+    lazy_static! {
+        static ref RE: Regex = Regex::new(r"^\d{9}$").unwrap();
+    }
+    RE.is_match(passpord_id)
 }
 
 fn has_required_fields(doc: &Doc) -> bool {

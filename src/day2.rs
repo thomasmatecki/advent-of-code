@@ -1,5 +1,4 @@
 use crate::utils::load_input;
-extern crate regex;
 
 use regex::Regex;
 
