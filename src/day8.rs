@@ -3,6 +3,11 @@ use lazy_static::lazy_static;
 use regex::Regex;
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::collections::VecDeque;
+use std::fmt;
+use std::hash::Hash;
+use std::rc::Rc;
+use std::str::FromStr;
 
 lazy_static! {
     static ref RE: Regex = Regex::new(r"(\w{3}) ([+|-]\d+)").unwrap();
@@ -51,24 +56,32 @@ pub fn solution_1() -> i32 {
 
     return acc;
 }
-
+#[derive(Eq, PartialEq, Hash, Debug)]
 enum OpCode {
     ACC,
     JMP,
     NOP,
 }
 
-impl From<&str> for OpCode {
-    fn from(op_code: &str) -> Self {
-        match op_code {
-            "acc" => OpCode::ACC,
-            "jmp" => OpCode::JMP,
-            "nop" => OpCode::NOP,
-            _ => unreachable!(),
+impl fmt::Display for OpCode {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+impl FromStr for OpCode {
+    type Err = ();
+    fn from_str(op_str: &str) -> Result<Self, <Self as FromStr>::Err> {
+        match op_str {
+            "acc" => return Ok(OpCode::ACC),
+            "jmp" => Ok(OpCode::JMP),
+            "nop" => Ok(OpCode::NOP),
+            _ => return Err(()),
         }
     }
 }
 
+#[derive(Eq, PartialEq, Hash, Debug)]
 struct Instruction {
     idx: usize,
     opcode: OpCode,
@@ -79,27 +92,153 @@ struct Instruction {
 impl Instruction {
     fn from_str(idx: usize, op_str: &str) -> Self {
         let capture = RE.captures(op_str).unwrap();
-        let opcode: OpCode = OpCode::from(capture.get(1).unwrap().as_str());
+        let op_str = capture.get(1).unwrap().as_str();
+        let opcode: OpCode = op_str.parse().unwrap();
+        let arg: i32 = capture[2].parse().unwrap();
         Instruction {
             idx,
             opcode,
-            arg: 0,
+            arg,
             corrected: false,
         }
     }
-    fn next_idx(&self) -> i32 {
-        0
+    fn next_idx(&self) -> usize {
+        match self.opcode {
+            OpCode::ACC => self.idx + 1,
+            OpCode::JMP => (self.idx as i32 + self.arg) as usize,
+            OpCode::NOP => self.idx + 1,
+        }
+    }
+
+    fn exec(&self, op_idx: &mut usize, acc: &mut i32) {
+        match self.opcode {
+            OpCode::ACC => {
+                *op_idx += 1;
+                *acc += self.arg;
+            }
+            OpCode::JMP => {
+                *op_idx = (*op_idx as i32 + self.arg) as usize;
+            }
+            OpCode::NOP => {
+                *op_idx += 1;
+            }
+        };
+    }
+
+    fn corrected(&self) -> Option<Instruction> {
+        if self.arg == 1 || self.opcode == OpCode::ACC {
+            None
+        } else {
+            let opcode = match self.opcode {
+                OpCode::NOP => OpCode::JMP,
+                OpCode::JMP => OpCode::NOP,
+                OpCode::ACC => OpCode::ACC,
+            };
+
+            Some(Instruction {
+                idx: self.idx,
+                opcode: opcode,
+                arg: self.arg,
+                corrected: true,
+            })
+        }
     }
 }
 
-pub fn solution_2() -> u32 {
-    let mut idx_preds: HashMap<i32, HashSet<Instruction>> = HashMap::new();
-    let ops: Vec<String> = load_input("input/8.txt");
-    for (idx, op) in ops.iter().enumerate() {
-        let op_str = ops.get(idx as usize).unwrap();
-        let instr = Instruction::from_str(idx, op);
-        idx_preds.insert(instr.next_idx(), ...);
+struct IdxPreds {
+    map: HashMap<usize, HashSet<Instruction>>,
+}
+
+impl IdxPreds {
+    fn add(&mut self, instr: Instruction) {
+        let next_idx = instr.next_idx();
+
+        if let Some(set) = self.map.get_mut(&next_idx) {
+            set.insert(instr);
+        } else {
+            let mut set: HashSet<Instruction> = HashSet::new();
+            set.insert(instr);
+            self.map.insert(next_idx, set);
+        }
     }
 
-    0
+    fn from_input(input: Vec<String>) -> Self {
+        let mut idx_preds = IdxPreds {
+            map: HashMap::new(),
+        };
+
+        for (idx, op) in input.iter().enumerate() {
+            let instr = Instruction::from_str(idx, op);
+            if let Some(corr_instr) = instr.corrected() {
+                idx_preds.add(corr_instr);
+            };
+            idx_preds.add(instr);
+        }
+
+        idx_preds
+    }
+}
+
+#[derive(Debug)]
+struct TraceStep<'a> {
+    corrected: bool,
+    next_step: Option<Rc<TraceStep<'a>>>,
+    instr: &'a Instruction,
+}
+
+fn determine_traceback<'a>(idx_preds: &'a IdxPreds, idx: usize) -> Option<Rc<TraceStep<'a>>> {
+    let mut queue: VecDeque<Rc<TraceStep>> = VecDeque::new();
+    let terms = idx_preds.map.get(&idx).unwrap();
+
+    for instr in terms {
+        queue.push_back(Rc::new(TraceStep {
+            corrected: instr.corrected,
+            next_step: None,
+            instr,
+        }));
+    }
+
+    // Traverse backwards
+    while let Some(next_step) = queue.pop_front() {
+        let next_instr = next_step.instr;
+        // Get instructions that may be a predecessor
+        if let Some(preds) = idx_preds.map.get(&next_instr.idx) {
+            // For all instructions that may precede the current...
+            for prev_instr in preds {
+                let step = Rc::new(TraceStep {
+                    // Either a previous instruction has been corrected or this
+                    // one is the correction.
+                    corrected: prev_instr.corrected || next_step.corrected,
+                    next_step: Some(next_step.clone()),
+                    instr: prev_instr,
+                });
+                if prev_instr.idx == 0 {
+                    // We're done!
+                    return Some(step);
+                } else if !(next_step.corrected && prev_instr.corrected) {
+                    // Push the next step in the backtrace to the queue.
+                    queue.push_back(step);
+                }
+            }
+        } else {
+            panic!();
+        }
+    }
+    return None;
+}
+
+pub fn solution_2() -> i32 {
+    let ops: Vec<String> = load_input("input/8.txt");
+    let term_idx = ops.len();
+
+    let idx_preds = IdxPreds::from_input(ops);
+    let mut trace_step: Option<Rc<TraceStep>> = determine_traceback(&idx_preds, term_idx);
+    let mut acc: i32 = 0;
+    let mut idx: usize = 0;
+    while let Some(step) = trace_step {
+        step.instr.exec(&mut idx, &mut acc);
+        trace_step = step.next_step.clone();
+    }
+
+    return acc;
 }
