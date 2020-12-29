@@ -1,3 +1,5 @@
+#![feature(min_const_generics)]
+
 mod day1;
 mod day17;
 mod day2;
@@ -27,4 +29,5 @@ fn main() {
     println!("Day 8, part 1 {}", day8::solution_1());
     println!("Day 8, part 2 {}", day8::solution_2());
     println!("Day 17, part 1 {}", day17::solution_1());
+    println!("Day 17, part 2 {}", day17::solution_2());
 }
