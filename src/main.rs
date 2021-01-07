@@ -1,6 +1,7 @@
 #![feature(min_const_generics)]
 
 mod day1;
+mod day10;
 mod day17;
 mod day2;
 mod day3;
@@ -9,6 +10,7 @@ mod day5;
 mod day6;
 mod day7;
 mod day8;
+mod day9;
 mod utils;
 
 fn main() {
@@ -28,6 +30,9 @@ fn main() {
     println!("Day 7, part 2 {}", day7::solution_2());
     println!("Day 8, part 1 {}", day8::solution_1());
     println!("Day 8, part 2 {}", day8::solution_2());
+    println!("Day 9, part 1 {}", day9::solution_1());
+    println!("Day 9, part 2 {}", day9::solution_2());
+    println!("Day 10, part 1 {}", day10::solution_1());
     println!("Day 17, part 1 {}", day17::solution_1());
     println!("Day 17, part 2 {}", day17::solution_2());
 }

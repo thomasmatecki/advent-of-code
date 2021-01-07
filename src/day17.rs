@@ -86,9 +86,26 @@ impl<const N: usize> PocketDimension<N> {
         return dim;
     }
 
-    fn span_iter(&self) -> Box<dyn Iterator<Item = [i32; N]>> {
-        return Box::new(DimensionIter::from_space(&self.space));
+    fn span_set(&self) -> Box<HashSet<[i32; N]>> {
+        let mut set: Box<HashSet<[i32; N]>> = Box::new(HashSet::new());
+
+        for coord in self.space.iter() {
+            let mut neighbor_span: [(i32, i32); N] = [(0, 0); N];
+            for dim in 0..N {
+                neighbor_span[dim] = (coord[dim] - 1, coord[dim] + 1);
+            }
+
+            for point in DimensionIter::new(neighbor_span) {
+                set.insert(point);
+            }
+        }
+
+        return set;
     }
+
+    // fn span_iter(&self) -> Box<dyn Iterator<Item = [i32; N]>> {
+    //     return Box::new(DimensionIter::from_space(&self.space));
+    // }
 
     fn next_active(&self, coord: [i32; N]) -> bool {
         let active = self.space.contains(&coord);
@@ -116,9 +133,10 @@ impl<const N: usize> PocketDimension<N> {
 
     fn tick(&mut self) {
         let mut space: HashSet<[i32; N]> = HashSet::new();
-        for coord in self.span_iter() {
-            if self.next_active(coord) {
-                space.insert(coord);
+        let check_set = self.span_set();
+        for coord in check_set.iter() {
+            if self.next_active(*coord) {
+                space.insert(*coord);
             }
         }
         self.space = space;
