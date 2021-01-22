@@ -1,4 +1,5 @@
 #![feature(min_const_generics)]
+#![feature(iterator_fold_self)]
 
 mod day1;
 mod day10;
@@ -39,6 +40,7 @@ fn main() {
     println!("Day 11, part 1 {}", day11::solution_1());
     println!("Day 11, part 2 {}", day11::solution_2());
     println!("Day 13, part 1 {}", day13::solution_1());
+    println!("Day 13, part 2 {}", day13::solution_2());
     println!("Day 17, part 1 {}", day17::solution_1());
     println!("Day 17, part 2 {}", day17::solution_2());
 }

@@ -31,25 +31,188 @@ fn earliest_bus(depart_time: u32, buses: Vec<u32>) -> (u32, u32) {
     return result;
 }
 
-///
-///
-///
-///
 pub fn solution_1() -> u32 {
     let (depart_time, buses) = parse_input("input/13.txt");
     let result = earliest_bus(depart_time, buses);
     return result.0 * result.1;
 }
 
+fn ext_euclid(a: i64, b: i64) -> (i64, i64, i64) {
+    let mut r = (a, b);
+    let mut s = (1, 0);
+    let mut t = (0, 1);
+
+    while r.1 != 0 {
+        let q = r.0 / r.1;
+        r = (r.1, r.0 - q * r.1);
+        s = (s.1, s.0 - q * s.1);
+        t = (t.1, t.0 - q * t.1);
+    }
+
+    (r.0, s.0, t.0)
+}
+
+fn bezout_solve(a: (i64, i64), o: i64) -> (i64, i64) {
+    let (gcd, s, _t) = ext_euclid(a.0, a.1);
+    let (q, r) = (o / gcd, o % gcd);
+    if r != 0 {
+        panic!("GCD does not divide offset")
+    }
+    let lcm = (a.0 * a.1).abs() / gcd;
+    let c = (s * -q).rem_euclid(lcm / a.0);
+
+    ((a.0 * c) % lcm, lcm)
+}
+/// Given a0, a1
+///
+/// Return n, m
+/// Such that s = n + mk , Satisfy
+///    s + a0_1 mod a0_0 = 0
+///    s + a1_1 mod a1_0 = 0
+///
+fn offset_bezout(a0: (i64, i64), a1: (i64, i64)) -> (i64, i64) {
+    let d = a1.1 - a0.1;
+    let s = bezout_solve((a0.0, a1.0), d);
+    return (s.0 - a0.1, s.1);
+}
+
+fn parse_buses(s: &str) -> Vec<(i64, i64)> {
+    s.split(',')
+        .enumerate()
+        .filter_map(|(idx, bus)| bus.parse::<i64>().ok().map(|p| (p, idx as i64)))
+        .collect()
+}
+
+pub fn solution_2() -> i64 {
+    let input = load_input("input/13.txt");
+    let buses = &input[1];
+    let schedule = parse_buses(&buses);
+    let mut redux = schedule[0];
+    let mut next = redux;
+
+    for bus in schedule.iter().skip(1) {
+        redux = offset_bezout(next, *bus);
+        next = (redux.1, -redux.0);
+    }
+
+    return redux.0;
+}
+
 #[cfg(test)]
 mod test {
 
     use super::*;
-    #[test]
-    fn example() {
-        let (depart_time, buses) = parse_input("input/13ex.txt");
-        let result = earliest_bus(depart_time, buses);
-        assert_eq!(result.0, 5);
-        assert_eq!(result.1, 59);
+
+    mod part_1 {
+        use super::*;
+        #[test]
+        fn example() {
+            let (depart_time, buses) = parse_input("input/13ex1.txt");
+            let result = earliest_bus(depart_time, buses);
+            assert_eq!(result.0, 5);
+            assert_eq!(result.1, 59);
+        }
+    }
+
+    mod test_ext_euclid {
+
+        use super::ext_euclid;
+        #[test]
+        fn test_240_46() {
+            let a = 240;
+            let b = 46;
+            let result = ext_euclid(a, b);
+            assert_eq!(result, (2, -9, 47));
+            let (gcd, s, t) = result;
+            assert_eq!(s * a + t * b, gcd)
+        }
+
+        #[test]
+        fn test_7_13() {
+            let a = 7;
+            let b = 13;
+            let result = ext_euclid(a, b);
+            let (gcd, s, t) = result;
+            assert_eq!(s * a + t * b, gcd)
+        }
+    }
+    mod test_bezout_solve {
+
+        use super::bezout_solve;
+        #[test]
+        fn test_7_13_offset_1() {
+            let a = 7;
+            let b = 13;
+            let offset = 1;
+            let result = bezout_solve((a, b), offset);
+            let (solution, modulo) = result;
+            assert_eq!(solution, 77);
+            assert_eq!(modulo, 91)
+        }
+    }
+
+    mod test_offset_bezout {
+
+        use super::*;
+        #[test]
+        fn test_7_13_offset_1_step_1() {
+            let s = offset_bezout((7, 1), (13, 2));
+            assert_eq!(s.0, 76);
+            assert_eq!(s.1, 91);
+        }
+
+        #[test]
+        fn test_221_13_offset_1_step() {
+            let a0 = (221, -77);
+            let a1 = (59, 2);
+            let s = offset_bezout(a0, a1);
+
+            //    n + a0_1 mod a0_0 = 0
+            assert_eq!(0, (s.0 + a0.1) % a0.0);
+            //    n + a1_1 mod a1_0 = 0
+            assert_eq!(0, (s.0 + a1.1) % a1.0);
+        }
+    }
+
+    mod part_2 {
+        use super::*;
+        #[test]
+        fn example_1() {
+            // Solve
+            // 0 = n + 0 mod 17
+            // 0 = n + 2 mod 13
+            let s = offset_bezout((17, 0), (13, 2));
+            assert_eq!(s.0, 102);
+            assert_eq!(s.1, 221);
+
+            // Solve
+            // 102 = n mod 221 => 0 = n - 102 mod 221
+            //                    0 = n + 3   mod 19
+            let s = offset_bezout((221, -102), (19, 3));
+            assert_eq!(s.0, 3417);
+            assert_eq!(s.1, 221 * 19);
+        }
+
+        #[test]
+        fn example_2() {
+            let s = offset_bezout((67, 0), (7, 1));
+            let s = offset_bezout((s.1, -s.0), (59, 2));
+            let s = offset_bezout((s.1, -s.0), (61, 3));
+            assert_eq!(s.0, 754018);
+        }
+
+        #[test]
+        fn example_3() {
+            let schedule = parse_buses("67,x,7,59,61");
+            let mut redux = schedule[0];
+            let mut next = redux;
+
+            for bus in schedule.iter().skip(1) {
+                redux = offset_bezout(next, *bus);
+                next = (redux.1, -redux.0);
+            }
+
+            assert_eq!(redux.0, 779210);
+        }
     }
 }
