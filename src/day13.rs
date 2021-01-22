@@ -83,6 +83,40 @@ fn parse_buses(s: &str) -> Vec<(i64, i64)> {
         .collect()
 }
 
+/// Whew... this deserves some explanation
+///
+/// We're utilizing the chinese remainder theorem to solve a system of modular
+/// congruences. The buses(k) each of have a period of a_k (the modulo) and we
+/// are looking to solve for a value, n where each bus departs some x_k minutes
+/// later. Yielding the system:
+///
+///    n       mod a_0 = 0
+///    n + x_1 mod a_1 = 0
+///      .
+///      .
+///      .
+///    n + x_1 mod a_1 = 0
+///
+/// We can solve an two of these using Extended Euclids Algorithm, that is
+/// for
+///
+///    n       mod a_i = 0
+///    n + x_j mod a_j = 0
+///
+/// We can find Bezout coefficents c_1 & c_2 satisying:
+///    c_1 a_i + c_2 a_j = GCD(a_i, a_j) = 1
+///
+/// All of the bus intervals are co-prime so GCD(a_i, a_j) = 1. From this we
+/// obtain the timestamp at which two buses will depart some m minutes
+/// apart: m (c_1 a_i + c_2 a_j) = m
+///        =>  m c_1 a_i = m (1 - c_2 a_j)
+///
+/// ... this is another periodic occurence. Every P = lcm(a_i, a_j) the i'th
+/// and j'th buses will depart m minutes are part. So we've take two periodic
+/// buses, figured out the period in which they coincide. For B buses, we now
+/// have reduced are our system of congruences to B-1 periodic buses. We thus
+/// can repeat this process _reducing_ over our set of buses until we have
+/// a single period in which they all coincide.
 pub fn solution_2() -> i64 {
     let input = load_input("input/13.txt");
     let buses = &input[1];
