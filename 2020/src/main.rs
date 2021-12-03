@@ -1,10 +1,10 @@
-#![feature(min_const_generics)]
-#![feature(iterator_fold_self)]
+extern crate aoc_lib;
 
 mod day1;
 mod day10;
 mod day11;
 mod day13;
+mod day14;
 mod day17;
 mod day2;
 mod day3;
@@ -14,7 +14,6 @@ mod day6;
 mod day7;
 mod day8;
 mod day9;
-mod utils;
 
 fn main() {
     println!("Day 1, part 1: {}", day1::solution_1());

@@ -1,4 +1,4 @@
-use crate::utils::load_input;
+use aoc_lib::load_input;
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::collections::HashMap;

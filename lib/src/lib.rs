@@ -2,6 +2,11 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
 
+pub fn hello_world() {
+    println!("Hello, world!");
+}
+
+
 pub fn load_input(filename: &str) -> Vec<String> {
     let path = Path::new(filename);
 

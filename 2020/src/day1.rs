@@ -1,4 +1,4 @@
-use crate::utils::load_input;
+use aoc_lib::load_input;
 
 fn parse_input() -> Vec<i32> {
     load_input(&"input/1.txt")

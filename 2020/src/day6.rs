@@ -1,4 +1,4 @@
-use crate::utils::load_input;
+use aoc_lib::load_input;
 use std::collections::HashSet;
 use std::iter::FromIterator;
 use std::mem::replace;

@@ -1,4 +1,4 @@
-use crate::utils::load_input;
+use aoc_lib::load_input;
 
 fn parse_input(filename: &str) -> (u32, Vec<u32>) {
     let input = load_input(filename);
@@ -86,9 +86,9 @@ fn parse_buses(s: &str) -> Vec<(i64, i64)> {
 /// Whew... this deserves some explanation
 ///
 /// We're utilizing the chinese remainder theorem to solve a system of modular
-/// congruences. The buses(k) each of have a period of a_k (the modulo) and we
-/// are looking to solve for a value, n where each bus departs some x_k minutes
-/// later. Yielding the system:
+/// congruences. The buses (indexed by k) each of have a period of a_k (the
+/// modulo) and we are looking to solve for a value n, where each bus departs
+/// some x_k minute later. Yielding the system:
 ///
 ///    n       mod a_0 = 0
 ///    n + x_1 mod a_1 = 0

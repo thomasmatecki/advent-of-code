@@ -1,5 +1,4 @@
-use crate::utils::load_input;
-use std::cmp::max;
+use aoc_lib::load_input;
 use std::collections::HashMap;
 
 fn parse_input(filename: &str) -> Vec<u64> {

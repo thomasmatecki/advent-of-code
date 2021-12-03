@@ -1,4 +1,4 @@
-use crate::utils::load_input;
+use aoc_lib::load_input;
 
 fn radix2str_to_int(column_str: &str, one: char, zero: char) -> u16 {
     let binary_str = column_str.replace(zero, "0").replace(one, "1");
