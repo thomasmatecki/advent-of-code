@@ -103,10 +103,6 @@ impl<const N: usize> PocketDimension<N> {
         return set;
     }
 
-    // fn span_iter(&self) -> Box<dyn Iterator<Item = [i32; N]>> {
-    //     return Box::new(DimensionIter::from_space(&self.space));
-    // }
-
     fn next_active(&self, coord: [i32; N]) -> bool {
         let active = self.space.contains(&coord);
 

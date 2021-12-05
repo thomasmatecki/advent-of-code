@@ -16,5 +16,5 @@ pub fn load_input(filename: &str) -> Vec<String> {
     };
 
     let reader = BufReader::new(&file).lines();
-    return reader.map(|line| line.unwrap()).collect();
+    return reader.map(Result::unwrap).collect();
 }
