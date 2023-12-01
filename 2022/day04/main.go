@@ -2,84 +2,67 @@ package main
 
 import (
 	"os"
+	"regexp"
+	"strconv"
 	"strings"
 )
 
-func priority(c byte) int {
-	if 'a' <= c && c <= 'z' {
-		return int(c - 96)
-	} else if 'A' <= c && c <= 'Z' {
-		return int(c - 38)
+var r = regexp.MustCompile(`(\d+)-(\d+),(\d+)-(\d+)`)
+var data, _ = os.ReadFile("04.txt")
+
+func parse(line string) [4]int {
+	matches := r.FindStringSubmatch(line)
+	var vs [4]int
+	for i := 0; i < 4; i++ {
+		vs[i], _ = strconv.Atoi(matches[i+1])
 	}
-	panic("No!")
+	return vs
 }
 
-func sharedCharPriority(line string) int {
-	lineLen := len(line)
-	if lineLen == 0 {
-		return 0
-	}
-
-	var charMap = make(map[byte]bool, 0)
-	chars := []byte(line)
-
-	for _, char := range chars[:lineLen/2] {
-		charMap[char] = true
-	}
-
-	for _, char := range chars[lineLen/2:] {
-		if charMap[char] {
-			return priority(char)
-		}
-	}
-	panic("No!")
+func encloses(vs [4]int) bool {
+	return (vs[2] <= vs[0] && vs[1] <= vs[3]) ||
+		(vs[2] >= vs[0] && vs[1] >= vs[3])
 }
 
 func PartOne() {
-	data, _ := os.ReadFile("03.txt")
 	total := 0
-
 	for _, line := range strings.Split(string(data), "\n") {
-		total += sharedCharPriority(line)
+		if len(line) == 0 {
+			break
+		}
+		vs := parse(line)
+		if encloses(vs) {
+			total += 1
+		}
 	}
 
 	println("Part One:", total)
 }
 
-func maxOccurring(lines []string) byte {
-	charCount := make(map[byte]int, 0)
-	for _, line := range lines {
-		chars := []byte(line)
-
-		charMap := make(map[byte]bool, 0)
-
-		for _, char := range chars {
-			charMap[char] = true
-		}
-
-		for char := range charMap {
-			charCount[char] += 1
-			if charCount[char] == 3 {
-				return char
-			}
-		}
-
-	}
-
-	panic("No!")
-
+func overlaps(vs [4]int) bool {
+	iv0 := vs[:2]
+	iv1 := vs[2:]
+	return (iv0[0] <= iv1[0] && iv1[0] <= iv0[1]) ||
+		(iv0[0] <= iv1[1] && iv1[1] <= iv0[1]) ||
+		(iv1[0] <= iv0[0] && iv0[0] <= iv1[1]) ||
+		(iv1[0] <= iv0[1] && iv0[1] <= iv1[1])
 }
 
 func PartTwo() {
-	data, _ := os.ReadFile("03.txt")
-	lines := strings.Split(string(data), "\n")
 	total := 0
+	for _, line := range strings.Split(string(data), "\n") {
+		if len(line) == 0 {
+			break
+		}
 
-	for i := 0; i < len(lines)-1; i += 3 {
-		chunk := lines[i : i+3]
-		total += priority(maxOccurring(chunk))
+		vs := parse(line)
+		if overlaps(vs) {
+			total += 1
+		}
 	}
+
 	println("Part Two:", total)
+
 }
 
 func main() {
