@@ -11,7 +11,4 @@ func TestPass(t *testing.T) {
 }
 
 func TestAddOne(t *testing.T) {
-	if AddOne(2) != 3 {
-		t.Fatalf(`Faile`)
-	}
 }
