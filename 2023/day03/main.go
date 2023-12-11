@@ -82,6 +82,7 @@ func (schematic Schematic) ProductGearRatios() (total int) {
 		for _, match := range matches {
 			col := match[0]
 			if nums := schematic.adjacentNums(row, col); len(nums) == 2 {
+				// TODO
 			}
 		}
 
