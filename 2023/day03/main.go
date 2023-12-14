@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -68,8 +69,48 @@ func (schematic Schematic) SumPartNums() (total int) {
 
 }
 
-func (schematic Schematic) adjacentNums(row, col int) []int {
-	return []int{}
+func (schematic Schematic) rowNumsOverlap(row, col int) (nums []int) {
+	prevRowPartNums := schematic.partNumMatchesByRow[row]
+	// Smallest index of a number ending equal or after one before the col.
+	colIdx := sort.Search(len(prevRowPartNums), func(i int) bool {
+		return prevRowPartNums[i][1] >= col
+	})
+
+	if colIdx == len(prevRowPartNums) {
+		return
+	}
+
+	partNumMatch := prevRowPartNums[colIdx]
+
+	if partNumMatch[0] <= col+1 {
+		str := schematic.rows[row][partNumMatch[0]:partNumMatch[1]]
+		val, _ := strconv.Atoi(str)
+		nums = append(nums, val)
+	}
+
+	if nextColIdx := colIdx + 1; nextColIdx < len(prevRowPartNums) {
+		partNumMatch = prevRowPartNums[nextColIdx]
+
+		if partNumMatch[0] <= col+1 && partNumMatch[1] >= col {
+			str := schematic.rows[row][partNumMatch[0]:partNumMatch[1]]
+			val, _ := strconv.Atoi(str)
+			nums = append(nums, val)
+		}
+
+	}
+
+	return
+}
+
+func (schematic Schematic) adjacentNums(row, col int) (nums []int) {
+	if row > 0 {
+		nums = append(nums, schematic.rowNumsOverlap(row-1, col)...)
+	}
+	nums = append(nums, schematic.rowNumsOverlap(row, col)...)
+	if row+1 < len(schematic.rows) {
+		nums = append(nums, schematic.rowNumsOverlap(row+1, col)...)
+	}
+	return
 }
 
 func (schematic Schematic) ProductGearRatios() (total int) {
@@ -82,7 +123,7 @@ func (schematic Schematic) ProductGearRatios() (total int) {
 		for _, match := range matches {
 			col := match[0]
 			if nums := schematic.adjacentNums(row, col); len(nums) == 2 {
-				// TODO
+				total += nums[0] * nums[1]
 			}
 		}
 
@@ -98,8 +139,8 @@ func PartOne() {
 }
 
 func PartTwo() {
-
-	total := 0
+	schematic := NewSchematic(data)
+	total := schematic.ProductGearRatios()
 
 	println("Part Two:", total)
 }
