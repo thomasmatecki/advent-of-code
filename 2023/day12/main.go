@@ -35,7 +35,26 @@ func FindMatches(l int, conditionStr string) [][]int {
 
 }
 
-func RecurCount(conditionStr string, contigLens []int, contigSum int) int {
+type MemoKey struct {
+	conditionStr string
+	contigSum    int
+}
+
+func RecurCount(
+	conditionStr string,
+	contigLens []int,
+	contigSum int,
+	memo *map[MemoKey]int,
+) int {
+	key := MemoKey{
+		conditionStr,
+		contigSum,
+	}
+	result, found := (*memo)[key]
+	if found {
+		return result
+	}
+
 	if contigSum > len(conditionStr) {
 		return 0
 	}
@@ -50,12 +69,12 @@ func RecurCount(conditionStr string, contigLens []int, contigSum int) int {
 
 	total := 0
 	matches := FindMatches(contigLens[0], conditionStr)
+	nextContigLens := contigLens[1:]
+	remainingContigSum := Sum(nextContigLens)
 	for _, match := range matches {
 		if strings.Contains(conditionStr[:match[0]], "#") {
 			break // As soon we are passed the first #, the matching no longer works
 		}
-
-		remainingContigSum := contigSum - match[1]
 
 		if match[1] == len(conditionStr) {
 			if len(contigLens) == 1 {
@@ -66,11 +85,12 @@ func RecurCount(conditionStr string, contigLens []int, contigSum int) int {
 		} else {
 			substr = "." + conditionStr[match[1]+1:]
 			if len(substr) > remainingContigSum { // Does this ever not happen?
-				c := RecurCount(substr, contigLens[1:], remainingContigSum)
+				c := RecurCount(substr, nextContigLens, remainingContigSum, memo)
 				total += c
 			}
 		}
 	}
+	(*memo)[key] = total
 	return total
 }
 
@@ -83,9 +103,11 @@ func ParseRow(row string, reps int) (conditionStr string, contigLens []int) {
 		contigLensVals[i], _ = strconv.Atoi(string(vStr))
 	}
 
-	for i := 0; i < reps; i++ {
+	contigLens = contigLensVals
+	conditionStr = conditionStrVal
+	for i := 1; i < reps; i++ {
 		contigLens = append(contigLens, contigLensVals...)
-		conditionStr += conditionStrVal
+		conditionStr += "?" + conditionStrVal
 	}
 	return
 }
@@ -100,7 +122,8 @@ func CountFile(filename string, reps int) int {
 			continue
 		}
 		conditionStr, contigLens := ParseRow(row, reps)
-		count := RecurCount(conditionStr, contigLens, Sum(contigLens))
+		memo := make(map[MemoKey]int, len(conditionStr))
+		count := RecurCount(conditionStr, contigLens, Sum(contigLens), &memo)
 
 		total += count
 	}
