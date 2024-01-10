@@ -1,0 +1,5 @@
+broadcaster -> a_
+%a_ -> in, co
+&in -> b_
+%b_ -> co
+&co -> ou

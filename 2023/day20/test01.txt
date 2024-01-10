@@ -1,0 +1,5 @@
+broadcaster -> ia, ib, ic
+%ia -> ib
+%ib -> ic
+%ic -> in
+&in -> ia
