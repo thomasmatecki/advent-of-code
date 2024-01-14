@@ -1,0 +1,13 @@
+broadcaster -> aa
+%aa -> ba, bb
+
+%ba -> ca
+%ca -> da
+%da -> ea
+%ea -> zz
+
+#%bb -> cb
+#%cb -> db
+#%db -> eb
+#%eb -> fb
+#%fb -> zz

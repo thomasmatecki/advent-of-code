@@ -1,0 +1,16 @@
+broadcaster -> zq
+%zq -> kg, xc
+%kg -> hn, xc
+%hn -> bm
+&xc -> bm, zq, jf, hg, bd, hn
+%bd -> px
+%px -> xc, hg
+&jf -> mf
+%bm -> xr
+%xr -> bd, xc
+%hg -> bq
+%bq -> xc, zv
+%zv -> xc, qc
+%qc -> qg, xc
+%qg -> xc
+&mf -> 

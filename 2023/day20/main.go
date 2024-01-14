@@ -9,6 +9,7 @@ import (
 
 type Receiver interface {
 	Recv(src *ReceiverKey, high bool) []Pulse
+	IsZeroed() bool
 }
 
 const (
@@ -17,20 +18,14 @@ const (
 )
 
 var (
-	ButtonKey       ReceiverKey = [2]byte{'>', '>'}
-	BroadCastKey    ReceiverKey = [2]byte{'.', '.'}
-	RxKey           ReceiverKey = [2]byte{'r', 'x'}
-	MfKey           ReceiverKey = [2]byte{'m', 'f'}
-	MfKeyInputFlips map[ReceiverKey]int
+	ButtonKey    ReceiverKey = [2]byte{'>', '>'}
+	BroadCastKey ReceiverKey = [2]byte{'.', '.'}
 )
 
 type Logger struct {
-	rcvCount, hiSndcount, loSndcount int
-	rXDone                           bool
-}
-
-func init() {
-	MfKeyInputFlips = make(map[ReceiverKey]int)
+	id                                               int
+	stateChangePushes                                []int
+	rcvCount, hiSndcount, loSndcount, broadcastCount int
 }
 
 func (l *Logger) PulseRepr(srcKey, dstKey *ReceiverKey, high bool) string {
@@ -51,7 +46,8 @@ func (l *Logger) PulseRepr(srcKey, dstKey *ReceiverKey, high bool) string {
 
 func (l *Logger) LogReceive(srcKey, dstKey *ReceiverKey, high bool, stateStr string) {
 	l.rcvCount += 1
-	fmt.Printf("Recv:[%04d] %s : %s \n", l.rcvCount, l.PulseRepr(srcKey, dstKey, high), stateStr)
+	//fmt.Printf("Recv:[%04d] %s : %s \n", l.rcvCount, l.PulseRepr(srcKey, dstKey, high), stateStr)
+
 }
 
 func (l *Logger) LogSend(srcKey, dstKey *ReceiverKey, high bool) {
@@ -60,21 +56,51 @@ func (l *Logger) LogSend(srcKey, dstKey *ReceiverKey, high bool) {
 	} else {
 		l.loSndcount += 1
 	}
-	if *dstKey == RxKey {
-		if !high {
-			l.rXDone = true
-		}
+
+	//totalSndCount := l.hiSndcount + l.loSndcount
+	//fmt.Printf("Send:[%04d] %s \n", totalSndCount, l.PulseRepr(srcKey, dstKey, high))
+}
+
+func (l *Logger) LogInputStateChange(
+	srcKey *ReceiverKey,
+	on bool,
+) {
+	var state string
+
+	if on {
+		state = "On"
+	} else {
+		state = "Off"
 	}
-	//fmt.Printf("Send:[%04d] %s \n", l.hiSndcount+l.loSndcount, l.PulseRepr(srcKey, dstKey, high))
+
+	if on {
+		l.stateChangePushes = append(l.stateChangePushes, l.broadcastCount)
+	}
+
+	fmt.Printf(
+		"(%06d) %s High %s:[%04d] \n",
+		l.broadcastCount,
+		srcKey[:2],
+		state,
+		l.rcvCount,
+	)
 }
 
 type ReceiverKey [2]byte
 type Network map[ReceiverKey]Receiver
 
+func (n *Network) IsZeroed() bool {
+	for _, recvr := range *n {
+		if !recvr.IsZeroed() {
+			return false
+		}
+	}
+	return true
+}
+
 func (n *Network) Get(k string) Receiver {
-	var cnKey ReceiverKey = [2]byte{k[0], k[1]}
-	r := (*n)[cnKey]
-	return r
+	var rk ReceiverKey = [2]byte([]byte(k)[:2])
+	return (*n)[rk]
 }
 
 type Pulse struct {
@@ -115,18 +141,20 @@ func (m *Module) Send(high bool) []Pulse {
 }
 
 type Broadcaster struct {
-	network *Network
-	logger  *Logger
-	dstKeys []ReceiverKey
+	network  *Network
+	logger   *Logger
+	initKeys []ReceiverKey
+	srcsMap  map[ReceiverKey][]ReceiverKey
 }
 
 func (b *Broadcaster) Broadcast(high bool) {
 	q := []Pulse{}
+	b.logger.broadcastCount += 1
 
 	b.logger.LogSend(&ButtonKey, &BroadCastKey, high)
 	b.logger.LogReceive(&ButtonKey, &BroadCastKey, high, "button pushed")
 
-	for _, dstKey := range b.dstKeys {
+	for _, dstKey := range b.initKeys {
 		dst := (*b.network)[dstKey]
 		b.logger.LogSend(&BroadCastKey, &dstKey, high)
 
@@ -148,17 +176,11 @@ func (b *Broadcaster) HiLoProduct() int {
 	return b.logger.hiSndcount * b.logger.loSndcount
 }
 
-func (b *Broadcaster) RxDone() bool {
-	return b.logger.rXDone
-}
-
-/*
 // Flip-flop modules (prefix %) are either on or off; they are initially off. If
 // a flip-flop module receives a high pulse, it is ignored and nothing happens.
 // However, if a flip-flop module receives a low pulse, it flips between on and
 // off. If it was off, it turns on and sends a high pulse. If it was on, it
 // turns off and sends a low pulse.
-*/
 type FlipFlop struct {
 	module Module
 	on     bool
@@ -183,14 +205,16 @@ func (ff *FlipFlop) Recv(src *ReceiverKey, high bool) []Pulse {
 	}
 }
 
-/*
+func (ff *FlipFlop) IsZeroed() bool {
+	return !ff.on
+}
+
 // Conjunction modules (prefix &) remember the type of the most recent pulse
 // received from each of their connected input modules; they initially default
 // to remembering a low pulse for each input. When a pulse is received, the
 // conjunction module first updates its memory for that input. Then, if it
 // remembers high pulses for all inputs, it sends a low pulse; otherwise, it
 // sends a high pulse.
-*/
 type Conjunction struct {
 	module      Module
 	inputStates map[ReceiverKey]bool
@@ -206,20 +230,15 @@ func (cj *Conjunction) Recv(src *ReceiverKey, high bool) []Pulse {
 		panic("no!")
 
 	}
-	//var JfKey ReceiverKey = [2]byte{'j', 'f'}
-	//if *cj.module.key == MfKey && *src == JfKey {
-	//	if cj.inputStates[*src] != high {
-	//		if !high {
-	//			fmt.Printf("%s -> mf input high [%08d - %08d] (%d)\n",
-	//				src[:2],
-	//				MfKeyInputFlips[*src],
-	//				cj.module.logger.rcvCount-1,
-	//				cj.module.logger.rcvCount-1-MfKeyInputFlips[*src],
-	//			)
-	//		}
-	//	}
-	//	MfKeyInputFlips[*src] = cj.module.logger.rcvCount
-	//}
+
+	if *cj.module.key == [2]byte{'m', 'f'} {
+		if high && !cj.inputStates[*src] {
+			cj.module.logger.LogInputStateChange(src, true)
+		}
+		if !high && cj.inputStates[*src] {
+			cj.module.logger.LogInputStateChange(src, false)
+		}
+	}
 
 	cj.inputStates[*src] = high
 
@@ -229,17 +248,29 @@ func (cj *Conjunction) Recv(src *ReceiverKey, high bool) []Pulse {
 		}
 	}
 
-	if *cj.module.key == MfKey {
-		println("found it!")
-	}
-
 	return cj.module.Send(false)
+}
+
+func (cj *Conjunction) IsZeroed() bool {
+	for _, on := range cj.inputStates {
+		if on {
+			return false
+		}
+	}
+	return true
 }
 
 var moduleExpr = regexp.MustCompile(`([%&])(\w{2})`)
 
 func Initdsts(dstsBytes []byte) (dsts []ReceiverKey) {
-	for _, destStr := range bytes.Split(dstsBytes, []byte(", ")) {
+	dstSplit := bytes.Split(dstsBytes, []byte(", "))
+	if len(dstSplit) == 0 {
+		return
+	}
+	for _, destStr := range dstSplit {
+		if len(destStr) != 2 {
+			continue
+		}
 		dsts = append(dsts, [2]byte(destStr))
 	}
 	return
@@ -248,7 +279,7 @@ func Initdsts(dstsBytes []byte) (dsts []ReceiverKey) {
 func InitBroadcaster(filename string) *Broadcaster {
 	input, _ := os.ReadFile(filename)
 	network := make(Network)
-	logger := new(Logger)
+	logger := Logger{id: 0}
 
 	conjunctions := make([]*Conjunction, 0)
 	srcsMap := make(map[ReceiverKey][]ReceiverKey)
@@ -266,8 +297,9 @@ func InitBroadcaster(filename string) *Broadcaster {
 
 			broadcaster = Broadcaster{
 				&network,
-				logger,
+				&logger,
 				dsts,
+				srcsMap,
 			}
 			continue
 		}
@@ -286,7 +318,7 @@ func InitBroadcaster(filename string) *Broadcaster {
 		module := Module{
 			&key,
 			&network,
-			logger,
+			&logger,
 			dsts,
 		}
 
@@ -310,9 +342,18 @@ func InitBroadcaster(filename string) *Broadcaster {
 		network[*conjunction.module.key] = conjunction
 	}
 
-	network.Get("cn")
-
 	return &broadcaster
+}
+
+func gcd(a, b int) int {
+	if b == 0 {
+		return a
+	}
+	return gcd(b, a%b)
+}
+
+func lcm(a, b int) int {
+	return (a * b) / gcd(a, b)
 }
 
 func PartOne() {
@@ -326,13 +367,19 @@ func PartOne() {
 
 func PartTwo() {
 
-	//broadcaster := InitBroadcaster("20.txt")
-	count := 0
-	//	for !broadcaster.RxDone() {
-	//		count++
-	//		broadcaster.Broadcast(false)
-	//	}
-	println("Part Two:", count)
+	broadcaster := InitBroadcaster("20.txt")
+
+	for i := 0; i < 5000; i++ {
+		broadcaster.Broadcast(false)
+	}
+
+	pushLCM := broadcaster.logger.stateChangePushes[0]
+
+	for _, push := range broadcaster.logger.stateChangePushes[1:4] {
+		pushLCM = lcm(pushLCM, push)
+	}
+
+	println("Part Two:", pushLCM)
 }
 
 func main() {
