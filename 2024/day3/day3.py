@@ -24,7 +24,7 @@ def part_one():
         print(f"part one: {r}")
 
 
-def step(matches):
+def exec_match(matches):
     multiply_enabled = True
     for m in matches:
         match m:
@@ -42,11 +42,11 @@ def step(matches):
 def part_two(filename):
     with open(f"2024/day3/{filename}", "r") as file:
         input = file.read()
-        matches = []
-        for t in MatchType:
-            matches.extend(Match(t, m) for m in re.finditer(t.value, input))
-    matches.sort(key=lambda x: x.re_match.start())
-    total = sum(step(matches))
+        matches = sorted(
+            (Match(t, m) for t in MatchType for m in re.finditer(t.value, input)),
+            key=lambda x: x.re_match.start(),
+        )
+    total = sum(exec_match(matches))
     print(f"part two ({filename}): {total}")
 
 
