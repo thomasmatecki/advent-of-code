@@ -1,2 +1,5 @@
 target/
-.vscode/
+vscode/
+**/zig-out/
+
+.DS_Store
