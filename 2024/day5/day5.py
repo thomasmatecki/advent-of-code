@@ -41,7 +41,7 @@ def part_one(filename):
     print(f"part one ({filename}): {result}")
 
 
-def reorderings(updates, successors):
+def reordered(updates, successors):
     for u in updates:
         reorderings = 0
         while (r := wrong_order(u, successors)) is not None:
@@ -54,7 +54,7 @@ def reorderings(updates, successors):
 
 def part_two(filename):
     successors, updates = load_input(filename)
-    result = sum(reorderings(updates, successors))
+    result = sum(reordered(updates, successors))
     print(f"part two ({filename}): {result}")
 
 
