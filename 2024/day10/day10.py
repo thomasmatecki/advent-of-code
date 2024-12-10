@@ -32,7 +32,7 @@ class Grid(UserList):
     def value(self, i, j):
         return self[i][j]
 
-    def travserse(self, collect, *p):
+    def traverse(self, collect, *p):
         paths = [p]
         while paths:
             path = paths.pop()
@@ -49,12 +49,12 @@ class Grid(UserList):
 
     def score(self, trailhead):
         trailends = set()
-        self.travserse(trailends.add, trailhead)
+        self.traverse(trailends.add, trailhead)
         return len(trailends)
 
     def rating(self, trailhead):
         trailends = list()
-        self.travserse(trailends.append, trailhead)
+        self.traverse(trailends.append, trailhead)
         return len(trailends)
 
 
