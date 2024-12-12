@@ -1,4 +1,3 @@
-
 from functools import cache
 from itertools import chain
 
@@ -19,26 +18,20 @@ def change(n):
 def breadth(stone, depth):
     stones = [stone]
     for _ in range(depth):
-        _stones = []
-#        stones = chain.from_iterable(map(change, stones))
-        for s in stones:
-            _stones.extend(change(s))
-        stones = _stones
-    return stones
+        stones = chain.from_iterable(change(s) for s in stones)
+    return tuple(stones)
 
 
 @cache
 def depth(stone, i):
     l = 0
-    for j in range(i):
-        adv = breadth(stone, depth=15)
-        stone, *tail = adv
-        k = i-j - 1
-        if k >= 1:
-            r += iter_depth(tail, k)
+    for j in range(i, 0, -1):
+        adv = breadth(stone, depth=3)
+        if (k := j-1) >= 1:
+            stone, *tail = adv
+            l += iter_depth(tail, k)
 
     l += len(adv)
-
     return l
 
 
@@ -50,5 +43,5 @@ if __name__ == "__main__":
     with open("2024/day11/input.txt") as f:
         stones = [*map(int, f.read().split())]
 
-    result = iter_depth(stones, 5)
+    result = iter_depth(stones, 25)
     print(result)
