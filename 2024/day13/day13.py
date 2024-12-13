@@ -31,9 +31,7 @@ class Machine(NamedTuple):
         py = self.py + self.offset
         px = self.px + self.offset
 
-        b, r_b = divmod((my * py - mx * px),
-                        (self.y_b * my - self.x_b * mx))
-
+        b, r_b = divmod(my * py - mx * px, self.y_b * my - self.x_b * mx)
         a, r_a = divmod(px - self.x_b * b,  self.x_a)
 
         if r_a != 0 or r_b != 0:
