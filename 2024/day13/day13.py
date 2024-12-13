@@ -31,12 +31,12 @@ class Machine(NamedTuple):
         py = self.py + self.offset
         px = self.px + self.offset
 
-        b, br = divmod((my * py - mx * px),
-                       (self.y_b * my - self.x_b * mx))
+        b, r_b = divmod((my * py - mx * px),
+                        (self.y_b * my - self.x_b * mx))
 
-        a, ar = divmod(px - self.x_b * b,  self.x_a)
+        a, r_a = divmod(px - self.x_b * b,  self.x_a)
 
-        if ar != 0 or br != 0:
+        if r_a != 0 or r_b != 0:
             raise ValueError("No solution")
 
         return a, b
