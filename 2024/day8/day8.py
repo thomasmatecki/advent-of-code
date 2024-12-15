@@ -1,4 +1,3 @@
-
 from collections import UserList, defaultdict
 from itertools import combinations
 from typing import NamedTuple
@@ -32,7 +31,7 @@ class Grid(UserList):
         antennas = defaultdict(list)
         for i, row in enumerate(self):
             for j, col in enumerate(row):
-                if col != '.':
+                if col != ".":
                     antennas[col].append(T(i, j))
         return antennas
 
@@ -73,7 +72,7 @@ def part_two(filename):
     print(f"part two: {len(antinodes)}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     part_one("test1.txt")
     part_one("input.txt")
     part_two("test1.txt")

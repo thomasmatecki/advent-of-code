@@ -1,6 +1,4 @@
-
 from collections import UserList
-from tokenize import Name
 from typing import NamedTuple
 
 
@@ -16,7 +14,7 @@ class Map(UserList):
     def handle_dblock(self, i, j, di, dj, check=False):
         match di, dj:
             case 0, _:  # horizontal
-                _j1, _j2 = j+dj, j + 2*dj
+                _j1, _j2 = j + dj, j + 2 * dj
                 ok = self.move(i, _j2, di, dj, check=check)
 
                 if not check and ok:
@@ -26,15 +24,15 @@ class Map(UserList):
                 return ok
 
             case _, 0:  # vertical
-                v = self[i+di][j]
-                j_ = j+1 if v == "[" else j-1
+                v = self[i + di][j]
+                j_ = j + 1 if v == "[" else j - 1
 
-                ok = check or self.move(i+di, j_, di, dj, check=True)
-                ok = ok and self.move(i+di, j, di, dj, check=check)
-                ok = ok and self.move(i+di, j_, di, dj, check=check)
+                ok = check or self.move(i + di, j_, di, dj, check=True)
+                ok = ok and self.move(i + di, j, di, dj, check=check)
+                ok = ok and self.move(i + di, j_, di, dj, check=check)
 
                 if not check and ok:
-                    self[i+di][j] = self[i][j]
+                    self[i + di][j] = self[i][j]
                     self[i][j] = "."
                 return ok
             case _, _:
@@ -66,15 +64,13 @@ class Map(UserList):
         return ok
 
     def __str__(self):
-        return "\n".join(
-            "".join(row) for row in self.data
-        )
+        return "\n".join("".join(row) for row in self.data)
 
     def gps_coordinates(self):
         for i, row in enumerate(self):
             for j, cell in enumerate(row):
                 if cell in ("O", "["):
-                    yield 100*i + j
+                    yield 100 * i + j
 
     def run(self, moves, verbose=False):
         if verbose:
@@ -83,8 +79,7 @@ class Map(UserList):
         for move in moves:
             success = self.move_robot(*move)
             if verbose:
-                print(f"\nMove {move}: " +
-                      ("success" if success else "failed"))
+                print(f"\nMove {move}: " + ("success" if success else "failed"))
                 print(self)
 
         return sum(self.gps_coordinates())
@@ -144,12 +139,7 @@ def part_one(filename):
 
 def part_two(filename):
 
-    warehouse, moves = load(filename, {
-        "#": "##",
-        "O": "[]",
-        ".": "..",
-        "@": "@."
-    })
+    warehouse, moves = load(filename, {"#": "##", "O": "[]", ".": "..", "@": "@."})
 
     warehouse.run(moves)
     gps_sum = sum(warehouse.gps_coordinates())

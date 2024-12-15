@@ -32,12 +32,12 @@ def wrong_order(update, successors):
 
 
 def middle(u):
-    return int(u[len(u)//2])
+    return int(u[len(u) // 2])
 
 
 def part_one(filename):
     successors, updates = load_input(filename)
-    result = sum(middle(u)for u in updates if not wrong_order(u, successors))
+    result = sum(middle(u) for u in updates if not wrong_order(u, successors))
     print(f"part one ({filename}): {result}")
 
 

@@ -1,7 +1,6 @@
-
 from collections import deque
 from itertools import product, zip_longest
-from operator import add,  mul
+from operator import add, mul
 
 from functools import wraps
 import time
@@ -18,6 +17,7 @@ def timeit(func):
             f"Function {func.__name__}{args} {kwargs if kwargs else ''} Took {total_time: .4f} seconds"
         )
         return result
+
     return timeit_wrapper
 
 
@@ -44,8 +44,7 @@ def load_eqs(filename):
     with open(f"2024/day7/{filename}") as f:
         lines = f.readlines()
         lines = [line.split(":") for line in lines]
-        eqs = [(int(line[0]), list(map(int, line[1].split())))
-               for line in lines]
+        eqs = [(int(line[0]), list(map(int, line[1].split()))) for line in lines]
     return eqs
 
 

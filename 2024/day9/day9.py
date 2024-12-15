@@ -23,7 +23,9 @@ def part_one(filename):
         chunks = list()
         cursor = 0
 
-        for file_id, (file_size, free_space) in enumerate(zip_longest(disk_map[::2], disk_map[1::2], fillvalue=0)):
+        for file_id, (file_size, free_space) in enumerate(
+            zip_longest(disk_map[::2], disk_map[1::2], fillvalue=0)
+        ):
             file_end = cursor + int(file_size)
             chunks.append(C(file_id, cursor, file_end))
             cursor = file_end
@@ -47,17 +49,15 @@ def part_one(filename):
                 move = chunks.pop(r_idx)
                 free_diff = empty.length - move.length
                 if free_diff > 0:
-                    chunks[i] = C(move.file_id, empty.start,
-                                  empty.start + move.length)
-                    chunks.insert(
-                        i+1, C(None, empty.start + move.length, empty.end))
+                    chunks[i] = C(move.file_id, empty.start, empty.start + move.length)
+                    chunks.insert(i + 1, C(None, empty.start + move.length, empty.end))
                 elif free_diff < 0:
                     chunks[i] = C(move.file_id, empty.start, empty.end)
                     chunks.insert(
-                        r_idx, C(move.file_id, move.start, move.start - free_diff))
+                        r_idx, C(move.file_id, move.start, move.start - free_diff)
+                    )
                 else:
-                    chunks[i] = C(move.file_id, chunk.start,
-                                  chunk.start + move.length)
+                    chunks[i] = C(move.file_id, chunk.start, chunk.start + move.length)
                     r_idx -= 1
 
         checksum = 0
@@ -79,7 +79,9 @@ def part_two(filename):
         offsets = defaultdict(int)
         cursor = 0
 
-        for file_id, (file_size, free_space) in enumerate(zip_longest(disk_map[::2], disk_map[1::2], fillvalue=0)):
+        for file_id, (file_size, free_space) in enumerate(
+            zip_longest(disk_map[::2], disk_map[1::2], fillvalue=0)
+        ):
             file_end = cursor + int(file_size)
             chunks.append(C(file_id, cursor, file_end))
             cursor = file_end
@@ -92,7 +94,7 @@ def part_two(filename):
         for i, chunk in reversed(list(enumerate(chunks))):
             start = offsets[chunk.length]
             for j_, free_space in enumerate(free_spaces[start:]):
-                j = j_+start
+                j = j_ + start
                 if chunk.start < free_space.start:
                     break
 
@@ -103,14 +105,17 @@ def part_two(filename):
                     continue
 
                 if free_space.length > chunk.length:
-                    chunks[i] = C(chunk.file_id, free_space.start,
-                                  free_space.start + chunk.length)
+                    chunks[i] = C(
+                        chunk.file_id, free_space.start, free_space.start + chunk.length
+                    )
                     free_spaces[j] = C(
-                        None, free_space.start + chunk.length, free_space.end)
+                        None, free_space.start + chunk.length, free_space.end
+                    )
 
                 else:
-                    chunks[i] = C(chunk.file_id, free_space.start,
-                                  free_space.start + chunk.length)
+                    chunks[i] = C(
+                        chunk.file_id, free_space.start, free_space.start + chunk.length
+                    )
                     free_spaces.pop(j)
 
                 break

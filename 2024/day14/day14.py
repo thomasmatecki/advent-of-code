@@ -34,7 +34,7 @@ def load(filename):
     with open(f"2024/day14/{filename}") as f:
         matches = re.findall(INPUT_RE, f.read())
         matches = (map(int, m) for m in matches)
-        return [(P(px, py),  V(vx, vy)) for px, py, vx, vy in matches]
+        return [(P(px, py), V(vx, vy)) for px, py, vx, vy in matches]
 
 
 class Grid(UserList):
@@ -45,19 +45,12 @@ class Grid(UserList):
         self.yb = yb
 
     def tick(self, t):
-        moved_pvs = ((
-            (p.move(v * t)) % (self.xb, self.yb), v)
-            for p, v in self
-        )
+        moved_pvs = (((p.move(v * t)) % (self.xb, self.yb), v) for p, v in self)
 
-        return Grid(
-            moved_pvs,
-            self.xb,
-            self.yb
-        )
+        return Grid(moved_pvs, self.xb, self.yb)
 
     def iter_quadrants(self, include_bounds=False):
-        m_x, m_y = self.xb//2, self.yb//2
+        m_x, m_y = self.xb // 2, self.yb // 2
         for p, _ in self:
             if p.y == m_y or p.x == m_x:
                 if include_bounds:
@@ -74,10 +67,7 @@ class Grid(UserList):
     def __str__(self) -> str:
         points = set(self.points().keys())
         return "\n".join(
-            "".join(
-                "#" if P(x, y) in points else "."
-                for x in range(self.xb)
-            )
+            "".join("#" if P(x, y) in points else "." for x in range(self.xb))
             for y in range(self.yb)
         )
 
@@ -113,8 +103,7 @@ def part_two(filename, xb, yb):
         grid = grid.tick(1)
         s = grid.seq_counts()
         if s.get(7, 0) > 100:
-            print(f"outlier: {k}->" +
-                  " ".join(f"{i}: {s[i]}" for i in range(7, 0, -1)))
+            print(f"outlier: {k}->" + " ".join(f"{i}: {s[i]}" for i in range(7, 0, -1)))
             break
 
 

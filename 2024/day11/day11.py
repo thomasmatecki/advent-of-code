@@ -12,7 +12,7 @@ def change(n):
         half = length // 2
         return (int(str_n[:half]), int(str_n[half:]))
     else:
-        return (n * 2024, )
+        return (n * 2024,)
 
 
 @cache
@@ -28,7 +28,7 @@ def depth(stone, i):
     l = 0
     for j in range(i, 0, -1):
         adv = breadth(stone, depth=5)
-        if (k := j-1) >= 1:
+        if (k := j - 1) >= 1:
             stone, tail = adv[0], adv[1:]
             l += iter_depth(tail, k)
 

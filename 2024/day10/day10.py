@@ -14,8 +14,10 @@ class Grid(UserList):
     def from_file(cls, filename: str) -> "Grid":
         with open(f"2024/day10/{filename}") as f:
             return cls(
-                map(list, (map(cls._int, line)
-                    for line in map(str.strip, f.readlines())))
+                map(
+                    list,
+                    (map(cls._int, line) for line in map(str.strip, f.readlines())),
+                )
             )
 
     def trailheads(self):
@@ -25,7 +27,7 @@ class Grid(UserList):
                     yield i, j
 
     def neighbors(self, i, j):
-        for i0, j0 in [(i-1, j), (i+1, j), (i, j-1), (i, j+1)]:
+        for i0, j0 in [(i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1)]:
             if 0 <= i0 < len(self) and 0 <= j0 < len(self[0]):
                 yield i0, j0
 
@@ -60,13 +62,13 @@ class Grid(UserList):
 
 def part_one(filename):
     grid = Grid.from_file(filename)
-    total_score = sum(grid.score(trailhead)for trailhead in grid.trailheads())
+    total_score = sum(grid.score(trailhead) for trailhead in grid.trailheads())
     print(f"part one ({filename}): {total_score}")
 
 
 def part_two(filename):
     grid = Grid.from_file(filename)
-    total_score = sum(grid.rating(trailhead)for trailhead in grid.trailheads())
+    total_score = sum(grid.rating(trailhead) for trailhead in grid.trailheads())
     print(f"part two ({filename}): {total_score}")
 
 

@@ -9,7 +9,7 @@ def turn_right(i_step, j_step):
             return 1, 0
         case 1, 0:
             return 0, -1
-        case  0, -1:
+        case 0, -1:
             return -1, 0
     raise ValueError("Invalid step")
 
@@ -57,7 +57,7 @@ class Grid(UserList[list]):
     def updated(self, i, j, v):
         i_row = self[i].copy()
         i_row[j] = v
-        grid = Grid(self[:i] + [i_row] + self[i + 1:])
+        grid = Grid(self[:i] + [i_row] + self[i + 1 :])
         return grid
 
     def __str__(self) -> str:
@@ -79,10 +79,8 @@ def part_two(filename):
     i_start, j_start = grid.find_start()
     cycle, path = grid.steps_from(-1, 0, i_start, j_start)
 
-    for (i, j) in set((i, j) for i, j, _, _ in path):
-        cycle, _ = grid.updated(i, j, "O").steps_from(
-            -1, 0, i_start, j_start
-        )
+    for i, j in set((i, j) for i, j, _, _ in path):
+        cycle, _ = grid.updated(i, j, "O").steps_from(-1, 0, i_start, j_start)
         if cycle:
             cycles += 1
 

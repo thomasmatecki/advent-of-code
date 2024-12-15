@@ -1,5 +1,3 @@
-
-
 from collections import UserList, deque
 from itertools import groupby
 from operator import itemgetter
@@ -13,7 +11,7 @@ class Grid(UserList):
             return cls(map(str.strip, file.read().splitlines()))
 
     def neighbors(self, i, j):
-        for i0, j0 in [(i-1, j), (i+1, j), (i, j-1), (i, j+1)]:
+        for i0, j0 in [(i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1)]:
             yield i0, j0
 
     def in_bounds(self, i, j):
@@ -59,8 +57,7 @@ class Grid(UserList):
     def _disjoints(self, xs):
         xs = sorted(xs)
         x = [_x for _x, _ in xs]
-        return 1 + sum(1 for n in range(1, len(x))
-                       if x[n]-x[n-1] > 1)
+        return 1 + sum(1 for n in range(1, len(x)) if x[n] - x[n - 1] > 1)
 
     def _collate_edges(self, edges, group, get_v):
         return sum(
@@ -81,9 +78,8 @@ class Grid(UserList):
         get_i = itemgetter(0)
         get_j = itemgetter(1)
 
-        return (
-            self._collate_edges(edges, get_i, get_j)
-            + self._collate_edges(edges, get_j, get_i)
+        return self._collate_edges(edges, get_i, get_j) + self._collate_edges(
+            edges, get_j, get_i
         )
 
 
