@@ -1,24 +1,5 @@
 from collections import deque
-from itertools import product, zip_longest
 from operator import add, mul
-
-from functools import wraps
-import time
-
-
-def timeit(func):
-    @wraps(func)
-    def timeit_wrapper(*args, **kwargs):
-        start_time = time.perf_counter()
-        result = func(*args, **kwargs)
-        end_time = time.perf_counter()
-        total_time = end_time - start_time
-        print(
-            f"Function {func.__name__}{args} {kwargs if kwargs else ''} Took {total_time: .4f} seconds"
-        )
-        return result
-
-    return timeit_wrapper
 
 
 def concat(a, b):
@@ -48,13 +29,11 @@ def load_eqs(filename):
     return eqs
 
 
-@timeit
 def part_one(filename):
     total_result = sum(iter_eqs(load_eqs(filename), (add, mul)))
     print(f"part one ({filename}): {total_result}")
 
 
-@timeit
 def part_two(filename):
     eqs = load_eqs(filename)
     total_result = sum(iter_eqs(eqs, (add, mul, concat)))

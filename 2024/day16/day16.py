@@ -1,9 +1,26 @@
 from collections import UserList
 from enum import Enum
 import heapq
-from re import S
-from tkinter import E, N
 from typing import NamedTuple
+
+
+from functools import wraps
+import time
+
+
+def timeit(func):
+    @wraps(func)
+    def timeit_wrapper(*args, **kwargs):
+        start_time = time.perf_counter()
+        result = func(*args, **kwargs)
+        end_time = time.perf_counter()
+        total_time = end_time - start_time
+        print(
+            f"Function {func.__name__}{args} {kwargs if kwargs else ''} Took {total_time: .4f} seconds"
+        )
+        return result
+
+    return timeit_wrapper
 
 
 class Dir(Enum):
@@ -23,8 +40,8 @@ class Node(NamedTuple):
 
     def cost(self, other):
         return (
-            abs(self.i-other.i)
-            + abs(self.j-other.j)
+            abs(self.i - other.i)
+            + abs(self.j - other.j)
             + abs((self.d.value - other.d.value) * 1000)
         )
 
@@ -69,17 +86,29 @@ class Maze(UserList):
 
         match d:
             case Dir.N:
-                ms = ((1, Node(i - 1, j, Dir.N)),
-                      (1000, Node(i, j, Dir.E)), (1000, Node(i, j, Dir.W)))
+                ms = (
+                    (1, Node(i - 1, j, Dir.N)),
+                    (1000, Node(i, j, Dir.E)),
+                    (1000, Node(i, j, Dir.W)),
+                )
             case Dir.E:
-                ms = ((1, Node(i, j+1, Dir.E)),
-                      (1000, Node(i, j, Dir.N)), (1000, Node(i, j, Dir.S)))
+                ms = (
+                    (1, Node(i, j + 1, Dir.E)),
+                    (1000, Node(i, j, Dir.N)),
+                    (1000, Node(i, j, Dir.S)),
+                )
             case Dir.S:
-                ms = ((1, Node(i+1, j, Dir.S)),
-                      (1000, Node(i, j, Dir.E)), (1000, Node(i, j, Dir.W)))
+                ms = (
+                    (1, Node(i + 1, j, Dir.S)),
+                    (1000, Node(i, j, Dir.E)),
+                    (1000, Node(i, j, Dir.W)),
+                )
             case Dir.W:
-                ms = ((1, Node(i, j-1, Dir.W)),
-                      (1000, Node(i, j, Dir.N)), (1000, Node(i, j, Dir.S)))
+                ms = (
+                    (1, Node(i, j - 1, Dir.W)),
+                    (1000, Node(i, j, Dir.N)),
+                    (1000, Node(i, j, Dir.S)),
+                )
 
         for c, m in ms:
             if self.in_bounds(m):
@@ -111,7 +140,7 @@ class Maze(UserList):
                 continue
 
             for n, c_ in g[v].items():
-                _c = c+c_
+                _c = c + c_
                 if n not in mins or mins[n].cost > _c:
                     mins[n] = Minimum(_c, [v])
                     heapq.heappush(q, (_c, n))
@@ -121,6 +150,7 @@ class Maze(UserList):
         return mins
 
 
+@timeit
 def part_one(filename):
     maze = Maze.from_file(filename)
     mins = maze.djikstra(maze.start())
@@ -131,7 +161,7 @@ def part_one(filename):
 
 
 def backtrace(mins: dict[Node, Minimum], ends: list[Minimum]):
-    q = [(p, ) for e in ends for p in e.prevs]
+    q = [(p,) for e in ends for p in e.prevs]
     tiles = set()
     while q:
         path = q.pop()
@@ -139,12 +169,13 @@ def backtrace(mins: dict[Node, Minimum], ends: list[Minimum]):
         tiles.add(last.ij)
         _, prevs = mins[last]
         for p in prevs:
-            p0 = path + (p, )
+            p0 = path + (p,)
             q.append(p0)  # type: ignore
 
-    return len(tiles)+1
+    return len(tiles) + 1
 
 
+@timeit
 def part_two(filename):
     maze = Maze.from_file(filename)
     mins = maze.djikstra(maze.start())
