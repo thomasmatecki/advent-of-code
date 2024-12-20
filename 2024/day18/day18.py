@@ -99,18 +99,20 @@ def part_two(filename, mx, my):
     corrupted = [(int(x), int(y)) for x, y in matches]
     s = Space(mx, my, set())
 
-    for i, c in enumerate(corrupted):
-        print(i, c)
+    path = set(p.xy for p in s.path())
+
+    for c in corrupted:
         s.corrupt(*c)
-        _, ps = s.search()
-        if not (70, 70) in ps:
-            print(f"part two ({filename}): {c}")
-            break
+        if c in path:
+            path = set(p.xy for p in s.path())
+            if not (70, 70) in path:
+                print(f"part two ({filename}): {c}")
+                break
 
 
 if __name__ == "__main__":
-    # part_one("test1.txt", 7, 7, 12)
+    part_one("test1.txt", 7, 7, 12)
     part_one("input.txt", 71, 71, 1028)
 
-    # part_two("test1.txt", 7, 7)
+    part_two("test1.txt", 7, 7)
     part_two("input.txt", 71, 71)
