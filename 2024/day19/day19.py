@@ -7,8 +7,7 @@ def load(filename):
         patterns, _, *designs = f.read().splitlines()
         patterns = [s.strip() for s in patterns.split(",")]
 
-    by_len = {l: set([*ps])
-              for l, ps in groupby(sorted(patterns, key=len), len)}
+    by_len = {l: set([*ps]) for l, ps in groupby(sorted(patterns, key=len), len)}
     return by_len, designs
 
 
