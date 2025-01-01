@@ -1,0 +1,15 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build zig test",
+            "type": "shell",
+            "command": "zig test -femit-bin=2019/zig-out/bin/${fileBasenameNoExtension}test ${relativeFile}"
+        },
+        {
+            "label": "build zig exe",
+            "type": "shell",
+            "command": "zig build-exe -femit-bin=2019/zig-out/bin/${fileBasenameNoExtension} ${relativeFile}"
+        }
+    ]
+}

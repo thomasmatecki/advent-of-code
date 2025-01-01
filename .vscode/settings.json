@@ -1,0 +1,5 @@
+{
+    "zig.path": "/usr/local/bin/zig",
+    "zig.zls.path": "/usr/local/bin/zls",
+    "debug.onTaskErrors": "abort"
+}
