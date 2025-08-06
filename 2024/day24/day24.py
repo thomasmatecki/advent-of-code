@@ -1,6 +1,4 @@
-
 from collections import defaultdict
-from itertools import pairwise
 import re
 from typing import NamedTuple, OrderedDict
 
@@ -97,6 +95,7 @@ def load(filename):
 
     with open(f"2024/day24/{filename}") as f:
         idx = dict()
+        r_idx = defaultdict(list)
         initials_str, gates_str = f.read().split("\n\n")
 
         for name, initial in re.findall(INITIALS_RE, initials_str):
@@ -106,12 +105,14 @@ def load(filename):
             gate_re = GATE_RE_TEMPLATE.format(cls.__name__)
             for l, r, name in re.findall(gate_re, gates_str):
                 idx[name] = cls(idx, l, r)
+                r_idx[l].append(name)
+                r_idx[r].append(name)
 
-        return idx
+        return idx, r_idx
 
 
 def part_one(filename):
-    idx = load(filename)
+    idx, _ = load(filename)
     o = number_for_prefix(idx, "z")
     print(f"Part one ({filename}): {o}")
 
@@ -122,30 +123,72 @@ def swap(a, b, idx):
     idx[b] = t
 
 
-def part_two(filename):
-    idx = load(filename)
+def factors(idx, gate) -> set[str]:
+    q = [gate]
+    f = set(q)
 
-    swaps = [("z09", "gwh"),
-             ("wgb", "wbw"),
-             ("z21", "rcb"),
-             ("jct", "z39")]
+    while q:
+        g = q.pop()
+        match idx[g]:
+            case Initial(_):
+                pass
+            case XOR(_, l, r) | OR(_, l, r) | AND(_, l, r):
+                n = (l, r)
+                q.extend(n)
+                f.update(n)
+
+    return f
+
+
+def multiples(r_idx, gate) -> set[str]:
+    q = [gate]
+    m = set()
+    while q:
+        g = q.pop()
+        n = [ng for ng in r_idx[g] if r_idx[ng]]
+        q.extend(n)
+        m.update(n)
+    return m
+
+
+def part_two(filename):
+    idx, r_idx = load(filename)
+
+    swaps = [
+        ("z09", "gwh"),
+        # ("wgb", "wbw"),
+        # ("z21", "rcb"),
+        # ("jct", "z39")
+    ]
 
     for a, b in swaps:
         swap(a, b, idx)
 
+    correct = set()
+    correct.difference()
+
     n_x = number_for_prefix(idx, "x")
     n_y = number_for_prefix(idx, "y")
     n_z = number_for_prefix(idx, "z")
+    fs = dict()
+    ds = dict()
     for i, c in enumerate(reversed(bin(n_z ^ n_x + n_y))):
+        f = factors(idx, f"z{i:02}")
         if c == "1":
-            raise ValueError(f"Bit {i} is wrong")
+            fs[i] = f
+            ds[i] = f.difference(correct)
+            n0 = multiples(r_idx, f"x{i:02}") | multiples(r_idx, f"y{i:02}")
+        else:
+            correct.update(f)
 
-    print(f"part two: {','.join(sorted(k for t in swaps for k in t))}")
+    pass
+
+#    print(f"part two: {','.join(sorted(k for t in swaps for k in t))}")
 
 
 if __name__ == "__main__":
-    part_one("test1.txt")
-    part_one("test2.txt")
-    part_one("input.txt")
+    #    part_one("test1.txt")
+    #    part_one("test2.txt")
+    #    part_one("input.txt")
 
     part_two("input.txt")
