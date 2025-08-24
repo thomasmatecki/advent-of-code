@@ -3,10 +3,13 @@
 {
 	"name": "Ubuntu",
 	"image": "mcr.microsoft.com/devcontainers/base:jammy",
+	"postCreateCommand": ".devcontainer/postCreate.sh",
 	"features": {
 		"ghcr.io/devcontainers/features/go:1": {},
 		"ghcr.io/devcontainers/features/rust:1": {},
-		"ghcr.io/devcontainers-extra/features/zig:1": {},
+		"ghcr.io/devcontainers-extra/features/zig:1": {
+			"version": "0.14.0"
+		},
 		"ghcr.io/devcontainers/features/python:1": {}
 	},
 	"customizations": {
@@ -16,7 +19,8 @@
 				"zig.zls.path": "/usr/local/bin/zls"
 			},
 			"extensions": [
-				"ms-python.python"
+				"ms-python.python",
+				"ziglang.vscode-zig"
 			]
 		}
 	}

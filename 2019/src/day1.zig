@@ -26,13 +26,12 @@ fn inputIterator(path: []const u8) !Iterator {
     var file = try std.fs.cwd().openFile(path, .{});
     const file_reader = file.reader();
     var buffered_reader = std.io.bufferedReader(file_reader);
-    var line_reader = buffered_reader.reader();
 
     return Iterator{
         .file = file,
         .file_reader = file_reader,
         .buffered_reader = buffered_reader,
-        .line_reader = line_reader.any(),
+        .line_reader = buffered_reader.reader().any(),
     };
 }
 
@@ -51,7 +50,6 @@ pub fn part1() !void {
 pub fn part2() !void {
     var iterator = try inputIterator("day1/input.txt");
     defer iterator.close();
-
     var s: i32 = 0;
 
     while (try iterator.next()) |i| {
