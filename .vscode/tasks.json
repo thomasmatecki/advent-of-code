@@ -7,7 +7,7 @@
             "command": "zig",
             "args": [
                 "test",
-                "-femit-bin=2019/zig-out/bin/${fileBasenameNoExtension}test",
+                "-femit-bin=2025/zig-out/bin/${fileBasenameNoExtension}test",
                 "--dep",
                 "aoc",
                 "-Mroot=${relativeFile}",
@@ -20,7 +20,7 @@
             "command": "zig",
             "args": [
                 "build-exe",
-                "-femit-bin=2019/zig-out/bin/${fileBasenameNoExtension}",
+                "-femit-bin=2025/zig-out/bin/${fileBasenameNoExtension}",
                 "--dep",
                 "aoc",
                 "-Mroot=${relativeFile}",
@@ -32,7 +32,7 @@
             "type": "shell",
             "command": "zig",
             "options": {
-                "cwd": "${workspaceFolder}/2019"
+                "cwd": "${workspaceFolder}/2025"
             },
             "args": [
                 "build"

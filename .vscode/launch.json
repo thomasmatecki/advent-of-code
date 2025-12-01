@@ -32,9 +32,9 @@
             "type": "lldb",
             "request": "launch",
             "name": "Zig Debug Exec",
-            "program": "${workspaceFolder}/2019/zig-out/bin/${fileBasenameNoExtension}",
+            "program": "${workspaceFolder}/2025/zig-out/bin/${fileBasenameNoExtension}",
             "args": [],
-            "cwd": "${workspaceFolder}/2019",
+            "cwd": "${workspaceFolder}/2025",
             "preLaunchTask": "build zig exe",
         },
         {
