@@ -1,5 +1,8 @@
 target/
 vscode/
 **/zig-out/
+**/.zig-cache/
+
+**/__pycache__/
 
 .DS_Store

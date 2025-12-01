@@ -1,42 +1,12 @@
 const std = @import("std");
+const aoc: type = @import("aoc");
 
 fn calcFuel(i: i32) i32 {
     return @divFloor(i, 3) - 2;
 }
 
-const Iterator = struct {
-    file: std.fs.File,
-    file_reader: std.fs.File.Reader,
-    buffered_reader: std.io.BufferedReader(4096, std.fs.File.Reader),
-    line_reader: std.io.AnyReader,
-    buf: [32]u8 = undefined,
-    fn next(self: *Iterator) !?i32 {
-        if (try self.line_reader.readUntilDelimiterOrEof(&self.buf, '\n')) |line| {
-            return try std.fmt.parseInt(i32, line, 10);
-        } else {
-            return null;
-        }
-    }
-    fn close(self: *Iterator) void {
-        self.file.close();
-    }
-};
-
-fn inputIterator(path: []const u8) !Iterator {
-    var file = try std.fs.cwd().openFile(path, .{});
-    const file_reader = file.reader();
-    var buffered_reader = std.io.bufferedReader(file_reader);
-
-    return Iterator{
-        .file = file,
-        .file_reader = file_reader,
-        .buffered_reader = buffered_reader,
-        .line_reader = buffered_reader.reader().any(),
-    };
-}
-
 pub fn part1() !void {
-    var iterator = try inputIterator("day1/input.txt");
+    var iterator = try aoc.inputIterator(i32, "day1/input.txt", '\n');
     defer iterator.close();
 
     var s: i32 = 0;
@@ -48,7 +18,7 @@ pub fn part1() !void {
 }
 
 pub fn part2() !void {
-    var iterator = try inputIterator("day1/input.txt");
+    var iterator = try aoc.inputIterator(i32, "day1/input.txt", '\n');
     defer iterator.close();
     var s: i32 = 0;
 

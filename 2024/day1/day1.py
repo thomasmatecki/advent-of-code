@@ -11,8 +11,7 @@ def load_lists():
 
 def part_one():
     r0, r1 = map(sorted, load_lists())
-    print(
-        f"part one: {sum(max(v0, v1) - min(v0, v1) for v0, v1 in zip(r0, r1))}")
+    print(f"part one: {sum(max(v0, v1) - min(v0, v1) for v0, v1 in zip(r0, r1))}")
 
 
 def part_two():

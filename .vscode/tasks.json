@@ -4,12 +4,39 @@
         {
             "label": "build zig test",
             "type": "shell",
-            "command": "zig test -femit-bin=2019/zig-out/bin/${fileBasenameNoExtension}test ${relativeFile}"
+            "command": "zig",
+            "args": [
+                "test",
+                "-femit-bin=2019/zig-out/bin/${fileBasenameNoExtension}test",
+                "--dep",
+                "aoc",
+                "-Mroot=${relativeFile}",
+                "-Maoc=${relativeFileDirname}/aoc.zig",
+            ]
         },
         {
             "label": "build zig exe",
             "type": "shell",
-            "command": "zig build-exe -femit-bin=2019/zig-out/bin/${fileBasenameNoExtension} ${relativeFile}"
+            "command": "zig",
+            "args": [
+                "build-exe",
+                "-femit-bin=2019/zig-out/bin/${fileBasenameNoExtension}",
+                "--dep",
+                "aoc",
+                "-Mroot=${relativeFile}",
+                "-Maoc=${relativeFileDirname}/aoc.zig",
+            ]
+        },
+        {
+            "label": "build main",
+            "type": "shell",
+            "command": "zig",
+            "options": {
+                "cwd": "${workspaceFolder}/2019"
+            },
+            "args": [
+                "build"
+            ]
         }
     ]
 }

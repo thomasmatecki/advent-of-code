@@ -22,20 +22,29 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug Test",
+            "name": "Zig Debug Test",
             "program": "${workspaceFolder}/2019/zig-out/bin/${fileBasenameNoExtension}test",
             "args": [],
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/2019",
             "preLaunchTask": "build zig test"
         },
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug Exec",
+            "name": "Zig Debug Exec",
             "program": "${workspaceFolder}/2019/zig-out/bin/${fileBasenameNoExtension}",
             "args": [],
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/2019",
             "preLaunchTask": "build zig exe",
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Zig Debug Main (2019)",
+            "program": "${workspaceFolder}/2019/zig-out/bin/2019",
+            "args": [],
+            "cwd": "${workspaceFolder}/2019",
+            "preLaunchTask": "build main",
         },
         {
             "name": "Launch Package",

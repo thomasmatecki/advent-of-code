@@ -15,31 +15,11 @@ pub fn build(b: *std.Build) !void {
     const optimize = b.standardOptimizeOption(.{});
 
     const exe = b.addExecutable(.{
-        .name = "2019",
+        .name = "2025",
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
     });
-
-    exe.linkLibC();
-
-    //    exe.addIncludePath(b.path("lib"));
-    //
-    //    exe.addCSourceFile(.{
-    //        .file = b.path("lib/regez.c"),
-    //    });
-
-    const regex = b.addModule("regex", .{
-        .root_source_file = b.path("src/regex.zig"),
-    });
-
-    regex.addIncludePath(b.path("lib"));
-
-    regex.addCSourceFile(.{
-        .file = b.path("lib/regez.c"),
-    });
-
-    exe.root_module.addImport("regex", regex);
 
     const aoc = b.addModule("aoc", .{
         .root_source_file = b.path("src/aoc.zig"),
@@ -48,7 +28,7 @@ pub fn build(b: *std.Build) !void {
     var modNameBuf: [5]u8 = undefined;
     var modPathBuf: [15]u8 = undefined;
 
-    for (1..4) |day| {
+    for (1..2) |day| {
         const modName = try std.fmt.bufPrint(
             &modNameBuf,
             "day{d}",

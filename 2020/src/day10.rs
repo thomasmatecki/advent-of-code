@@ -51,9 +51,9 @@ pub fn solution_2() -> u64 {
 }
 mod tests {
 
-    use super::{calc_arrangements, multiply_counts, parse_input};
     mod solution_1 {
-        use super::{multiply_counts, parse_input};
+        use crate::day10::{multiply_counts, parse_input};
+
         #[test]
         fn example_1() {
             let mut voltages = parse_input("input/10ex1.txt");
@@ -72,7 +72,8 @@ mod tests {
     }
 
     mod solution_2 {
-        use super::{calc_arrangements, parse_input};
+        use crate::day10::{calc_arrangements, parse_input};
+
         #[test]
         fn example_1() {
             let mut voltages = parse_input("input/10ex1.txt");
